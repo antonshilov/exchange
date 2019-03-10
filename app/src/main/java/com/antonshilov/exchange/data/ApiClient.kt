@@ -1,5 +1,6 @@
 package com.antonshilov.exchange.data
 
+import com.antonshilov.exchange.BuildConfig
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -18,11 +19,13 @@ interface QuotesService {
     @GET("symbols")
     fun getSymbols(): Single<List<String>>
 
-    @GET("quotes")
+    @GET("liveQuotes")
     fun getQuotes(@Query("pairs") pairs: String): Observable<List<Quote>>
 }
 
 object QuotesSerficeFactory {
+    private val API_KEY = "4hZAb32JfTCh7ineyODFhvC8sQHchVWr"
+
     fun makeService(): QuotesService {
         val retrofit = Retrofit.Builder()
             .client(makeClient())
@@ -40,7 +43,7 @@ object QuotesSerficeFactory {
             val originalHttpUrl = original.url()
 
             val url = originalHttpUrl.newBuilder()
-                .addQueryParameter("api_key", "4hZAb32JfTCh7ineyODFhvC8sQHchVWr")
+                .addQueryParameter("api_key", API_KEY)
                 .build()
 
             // Request customization: add request headers
@@ -50,7 +53,8 @@ object QuotesSerficeFactory {
             val request = requestBuilder.build()
             chain.proceed(request)
         }
-        httpClient.addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+        val level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        httpClient.addInterceptor(HttpLoggingInterceptor().setLevel(level))
         return httpClient.build()
     }
 }
@@ -64,4 +68,6 @@ data class Quote(
 ) {
     val isInitialized: Boolean
         get() = timestamp != 0L
+
+    fun isExpired(limit: Long) = System.currentTimeMillis() - timestamp >= limit
 }

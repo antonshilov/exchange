@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">Exchange</string>
-    <string name="price">%.5f</string>
-    <string name="empty_price">-</string>
-    <string name="ask">ask: %.5f</string>
-    <string name="empty_ask">ask: -</string>
-    <string name="bid">bid: %.5f</string>
-    <string name="empty_bid">bid: -</string>
-    <string name="updated">Обновлено %s</string>
-    <string name="not_updated">Не обновлено</string>
+    <string name="app_name" translatable="false">Exchange</string>
+    <string name="price" translatable="false">%.5f</string>
+    <string name="empty_price" translatable="false">-</string>
+    <string name="ask" translatable="false">ask: %.5f</string>
+    <string name="empty_ask" translatable="false">ask: -</string>
+    <string name="bid" translatable="false">bid: %.5f</string>
+    <string name="empty_bid" translatable="false">bid: -</string>
+    <string name="updated">Updated %s</string>
+    <string name="not_updated">Not updated yet</string>
 </resources>
