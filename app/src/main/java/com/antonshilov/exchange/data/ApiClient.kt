@@ -61,4 +61,7 @@ data class Quote(
     val bid: Double,
     val ask: Double,
     val timestamp: Long
-)
+) {
+    val isInitialized: Boolean
+        get() = timestamp != 0L
+}

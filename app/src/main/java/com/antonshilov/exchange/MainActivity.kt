@@ -3,6 +3,7 @@ package com.antonshilov.exchange
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.subjects.BehaviorSubject
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         quotesList.adapter = adapter
+        quotesList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         quotesList.layoutManager = LinearLayoutManager(this)
         quotesList.addOnScrollListener(visibleItemsListener)
         initViewModel()

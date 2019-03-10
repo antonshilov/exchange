@@ -1,5 +1,7 @@
 package com.antonshilov.exchange
 
+import android.os.Handler
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,7 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+
 class QuotesViewModel(private val api: QuotesService) : ViewModel() {
     private lateinit var symbolsList: List<String>
     val quotes = MutableLiveDataKtx<List<Quote>>()
@@ -37,15 +40,12 @@ class QuotesViewModel(private val api: QuotesService) : ViewModel() {
             }
             .flattenAsObservable { it }
             .map {
-
                 val quote = createEmptyQuote(it)
                 map[it] = quote
-                quote
             }
-            .collectInto(ArrayList<Quote>()) { t1, t2 -> t1.add(t2) }
             .subscribeBy(
-                onSuccess = {
-                    quotes.postValue(it)
+                onComplete = {
+                    quotes.postValue(map.values.toList())
                 },
                 onError = {
                     it.printStackTrace()
@@ -82,7 +82,7 @@ class QuotesViewModel(private val api: QuotesService) : ViewModel() {
     private fun observable(visibleItems: Observable<Pair<Int, Int>>): Observable<Pair<Int, Int>> {
         return Observable.interval(0, 5, TimeUnit.SECONDS)
             .flatMap { visibleItems }
-            .debounce(600, TimeUnit.MILLISECONDS, Schedulers.io())
+            .debounce(300, TimeUnit.MILLISECONDS, Schedulers.io())
     }
 
 }
@@ -109,8 +109,49 @@ class QuotesAdapter : ListAdapter<Quote, QuotesAdapter.ViewHolder>(ItemCallback)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        lateinit var handler: Handler
         fun bind(quote: Quote) {
-            itemView.findViewById<TextView>(R.id.symbol).text = quote.symbol + quote.price
+            if (quote.isInitialized) {
+                bindQuote(quote)
+            } else {
+                bindUninitializedQuote(quote)
+            }
+        }
+
+        private fun bindQuote(quote: Quote) {
+            itemView.findViewById<TextView>(R.id.symbol).text = quote.symbol
+            itemView.findViewById<TextView>(R.id.price).text =
+                itemView.context.getString(R.string.price, quote.price)
+            itemView.findViewById<TextView>(R.id.ask).text = itemView.context.getString(R.string.ask, quote.ask)
+            itemView.findViewById<TextView>(R.id.bid).text = itemView.context.getString(R.string.bid, quote.bid)
+            setUpdateTimeRelative(quote)
+//            val updateRunnable = object : Runnable {
+//                override fun run() {
+//                    setUpdateTimeRelative(quote)
+//                    handler.postDelayed(this, 100)
+//                }
+//            }
+//            handler.postDelayed(updateRunnable, 1000)
+        }
+
+        private fun bindUninitializedQuote(quote: Quote) {
+            itemView.findViewById<TextView>(R.id.symbol).text = quote.symbol
+            itemView.findViewById<TextView>(R.id.price).text = itemView.context.getString(R.string.empty_price)
+            itemView.findViewById<TextView>(R.id.ask).text = itemView.context.getString(R.string.empty_ask)
+            itemView.findViewById<TextView>(R.id.bid).text = itemView.context.getString(R.string.empty_bid)
+            itemView.findViewById<TextView>(R.id.lastUpdate).text = itemView.context.getString(R.string.not_updated)
+        }
+
+        private fun setUpdateTimeRelative(quote: Quote) {
+            itemView.findViewById<TextView>(R.id.lastUpdate).text = itemView.context.getString(
+                R.string.updated,
+                DateUtils.getRelativeTimeSpanString(
+                    quote.timestamp * 1000,
+                    System.currentTimeMillis(),
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_RELATIVE
+                )
+            )
         }
     }
 }
