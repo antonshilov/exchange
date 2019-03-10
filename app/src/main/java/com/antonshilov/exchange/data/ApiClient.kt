@@ -19,7 +19,7 @@ interface QuotesService {
     @GET("symbols")
     fun getSymbols(): Single<List<String>>
 
-    @GET("liveQuotes")
+    @GET("quotes")
     fun getQuotes(@Query("pairs") pairs: String): Observable<List<Quote>>
 }
 

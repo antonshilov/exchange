@@ -2,6 +2,7 @@ package com.antonshilov.exchange.quotes
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,9 +42,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewModel() {
         vm.quotes.observe(this, Observer {
+            hideLoading()
             adapter.submitList(it)
         })
         vm.fetchQuotes()
+    }
+
+    private fun hideLoading() {
+        loadingIndicator.isVisible = false
     }
 
     private fun startVisibilityUpdates() {
